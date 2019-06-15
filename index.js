@@ -4,6 +4,59 @@ let usersDivEl;
 let postsDivEl;
 let commentsDivEl;
 let loadButtonEl;
+let albumsDivEl;
+
+function onLoadAlbums() {
+    const el = this;
+    const userId = el.getAttribute('data-user-id2');
+
+    const xhr = new XMLHttpRequest();
+    xhr.addEventListener('load', onAlbumsReceived);
+    xhr.open('GET', BASE_URL + '/albums?userId=' + userId);
+    xhr.send();
+}
+
+function onAlbumsReceived() {
+    albumsDivEl.style.display = 'block';
+
+    const text = this.responseText;
+    const albums = JSON.parse(text);
+
+    const divEl = document.getElementById('albums-content');
+    while(divEl.firstChild) {
+        divEl.removeChild(divEl.firstChild);
+    }
+    divEl.appendChild(createAlbumsList(albums));
+}
+
+function createAlbumsList(albums) {
+    const ulEl = document.createElement('ul');
+
+    for (let i = 0; i < albums.length; i++) {
+        const album = albums[i];
+
+        const strongEl = document.createElement('strong');
+        strongEl.textContent = album.title;
+
+        const dataAlbumIdAttr = document.createAttribute('data-album-id');
+        dataAlbumIdAttr.value = album.id;
+
+        const pEl = document.createElement('p');
+        pEl.appendChild(strongEl);
+
+        const liEl = document.createElement('li');
+        
+        const buttonEl = document.createElement('button');
+        buttonEl.textContent = "View photos";
+        buttonEl.setAttributeNode(dataAlbumIdAttr);
+        buttonEl.addEventListener('click', onLoadPhotos);
+        liEl.appendChild(pEl);
+
+        ulEl.appendChild(liEl);
+        ulEl.appendChild(buttonEl);
+    }
+    return ulEl;
+}
 
 function onLoadComments(){
     const el = this;
@@ -35,6 +88,12 @@ function createCommentsList(comments) {
     for (let i = 0; i < comments.length; i++) {
         const comment = comments[i];
 
+        const strongEl = document.createElement('strong');
+        strongEl.textContent = comment.name;
+
+        const pEmailEl = document.createElement('p');
+        pEmailEl.textContent = comment.email;
+
         // creating paragraph
         const dataCommentIdAttr = document.createAttribute('data-comment-id');
         dataCommentIdAttr.value = comment.id;
@@ -42,7 +101,7 @@ function createCommentsList(comments) {
         const pEl = document.createElement('p');
         pEl.appendChild(strongEl);
         pEl.appendChild(document.createTextNode(`: ${comment.body}`));
-
+        pEl.appendChild(pEmailEl)
         // creating list item
         const liEl = document.createElement('li');
         liEl.appendChild(pEl);
@@ -139,22 +198,30 @@ function createUsersTableBody(users) {
         const dataUserIdAttr = document.createAttribute('data-user-id');
         dataUserIdAttr.value = user.id;
 
+        const dataUserId2Attr = document.createAttribute('data-user-id2');
+        dataUserId2Attr.value = user.id;
+
         const buttonEl = document.createElement('button');
         buttonEl.textContent = user.name;
         buttonEl.setAttributeNode(dataUserIdAttr);
         buttonEl.addEventListener('click', onLoadPosts);
 
+        const buttonAlbumEl = document.createElement('button');
+        buttonAlbumEl.textContent = "View albums";
+        buttonAlbumEl.setAttributeNode(dataUserId2Attr);
+        buttonAlbumEl.addEventListener('click', onLoadAlbums);
+
         const nameTdEl = document.createElement('td');
         nameTdEl.appendChild(buttonEl);
-       
+
         // creating row
         const trEl = document.createElement('tr');
         trEl.appendChild(idTdEl);
         trEl.appendChild(nameTdEl);
+        trEl.appendChild(buttonAlbumEl);
 
         tbodyEl.appendChild(trEl);
     }
-
     return tbodyEl;
 }
 
@@ -185,6 +252,7 @@ function onLoadUsers() {
 document.addEventListener('DOMContentLoaded', (event) => {
     usersDivEl = document.getElementById('users');
     postsDivEl = document.getElementById('posts');
+    albumsDivEl = document.getElementById('albums');
     commentsDivEl = document.getElementById('comments');
     loadButtonEl = document.getElementById('load-users');
     loadButtonEl.addEventListener('click', onLoadUsers);
