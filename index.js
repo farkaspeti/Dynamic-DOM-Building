@@ -5,6 +5,58 @@ let postsDivEl;
 let albumsDivEl;
 let loadButtonEl;
 
+function onLoadPhotos() {
+    const el = this;
+    const albumId = el.getAttribute('id');
+
+    const xhr = new XMLHttpRequest();
+    xhr.addEventListener('load', onPhotosReceived);
+    xhr.open('GET', BASE_URL + '/photos?albumId=' + albumId);
+    xhr.send();
+}
+
+function onPhotosReceived() {
+    const text = this.responseText;
+    const photos = JSON.parse(text);
+
+
+    const albumId = photos[0].albumId;
+    const photoIds = document.getElementsByClassName('photos');
+
+    for (let i = 0; i < photoIds.length; i++) {
+        const photo = photoIds[i];
+        if (photo.getAttribute('id') !== albumId) {
+            photo.remove();
+        }
+    }
+
+    const divEl = document.getElementById(albumId);
+    if (divEl.childNodes.length <= 1) {
+        divEl.appendChild(createPhotoList(photos));
+    }
+}
+
+function createPhotoList(photos) {
+    const ulEl = document.createElement('ul');
+    ulEl.classList.add('photos');
+
+    for (let i = 0; i < photos.length; i++) {
+        const photo = photos[i];
+
+        ulEl.setAttribute('id', photo.albumId);
+
+        const aEl = document.createElement('a');
+        aEl.setAttribute('href', photo.url);
+
+        const imgEl = document.createElement('img');
+        imgEl.setAttribute('src', photo.thumbnailUrl);
+
+        aEl.appendChild(imgEl);
+        ulEl.appendChild(aEl);
+    }
+    return ulEl;
+}
+
 function onLoadAlbums() {
     const el = this;
     const userId = el.getAttribute('album-user-id');
@@ -32,11 +84,6 @@ function onAlbumsReceived() {
 function createAlbumsList(albums) {
     const ulEl = document.createElement('ul');
 
-    const h3El = document.createElement('h3');
-    h3El.textContent = 'Albums: ';
-    ulEl.appendChild(h3El);
-
-
     for (let i = 0; i < albums.length; i++) {
         const album = albums[i];
 
@@ -46,8 +93,8 @@ function createAlbumsList(albums) {
         const pEl = document.createElement('p');
         pEl.appendChild(strongEl);
 
-        const albumIdAttr = album.id;
 
+        const albumIdAttr = album.id;
         // creating list item
         const liEl = document.createElement('li');
         liEl.setAttribute('id', albumIdAttr)
@@ -56,9 +103,10 @@ function createAlbumsList(albums) {
         ulEl.appendChild(liEl);
 
         const buttonEl = document.createElement('button');
-        buttonEl.textContent ="View Photos";
-        buttonEl.setAttribute('album-user-id', albumIdAttr);
+        buttonEl.textContent = "View Photos";
+        buttonEl.setAttribute('id', albumIdAttr);
         buttonEl.addEventListener('click', onLoadPhotos);
+
         ulEl.appendChild(buttonEl);
     }
     return ulEl;
@@ -88,9 +136,9 @@ function onCommentsReceived() {
         }
     }
 
-    const divPostC = document.getElementById(postId);
-    if (divPostC.childNodes.length <= 1) {
-        divPostC.appendChild(createCommentsList(comments));
+    const divEl = document.getElementById(postId);
+    if (divEl.childNodes.length <= 1) {
+        divEl.appendChild(createCommentsList(comments));
     }
 }
 
@@ -149,7 +197,7 @@ function createPostsList(posts) {
         ulEl.appendChild(liEl);
 
         const buttonEl = document.createElement('button');
-        buttonEl.textContent ="View Comments";
+        buttonEl.textContent = "View Comments";
         buttonEl.setAttribute('post-id', postIdAttr);
         buttonEl.addEventListener('click', onLoadComments);
         ulEl.appendChild(buttonEl);
@@ -227,6 +275,9 @@ function createUsersTableBody(users) {
 
         const nameTdEl = document.createElement('td');
         nameTdEl.appendChild(buttonEl);
+
+        const albumTdEl = document.createElement('td');
+        albumTdEl.appendChild(buttonAlbumEl);
 
         // creating row
         const trEl = document.createElement('tr');
