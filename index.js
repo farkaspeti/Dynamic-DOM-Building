@@ -44,10 +44,14 @@ function createPhotoList(photos) {
 
         ulEl.setAttribute('id', photo.albumId);
 
+        const aEl = document.createElement('a');
+        aEl.setAttribute('href', photo.url);
+
         const imgEl = document.createElement('img');
         imgEl.setAttribute('src', photo.thumbnailUrl);
-  
-        ulEl.appendChild(imgEl);
+        
+        aEl.appendChild(imgEl);
+        ulEl.appendChild(aEl);
     }
     return ulEl;
 }
