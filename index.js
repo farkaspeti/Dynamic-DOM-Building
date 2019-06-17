@@ -19,7 +19,6 @@ function onPhotosReceived() {
     const text = this.responseText;
     const photos = JSON.parse(text);
 
-
     const albumId = photos[0].albumId;
     const photoIds = document.getElementsByClassName('photos');
 
@@ -45,14 +44,10 @@ function createPhotoList(photos) {
 
         ulEl.setAttribute('id', photo.albumId);
 
-        const aEl = document.createElement('a');
-        aEl.setAttribute('href', photo.url);
-
         const imgEl = document.createElement('img');
         imgEl.setAttribute('src', photo.thumbnailUrl);
-
-        aEl.appendChild(imgEl);
-        ulEl.appendChild(aEl);
+  
+        ulEl.appendChild(imgEl);
     }
     return ulEl;
 }
@@ -92,7 +87,6 @@ function createAlbumsList(albums) {
 
         const pEl = document.createElement('p');
         pEl.appendChild(strongEl);
-
 
         const albumIdAttr = album.id;
         // creating list item
